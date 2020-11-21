@@ -167,66 +167,37 @@ def to_direction(path):
 
 
 
-# reset the player at the starting room and traversal path
-traversal_path = []
-rooms = dict()
-player.current_room = world.starting_room
+counter = 0
+best_path = 2000
+while counter < 10000:
+    # reset the player at the starting room and traversal path
+    traversal_path = []
+    rooms = dict()
+    player.current_room = world.starting_room
 
-id = player.current_room.id
-rooms[id] = new_room(player.current_room)
+    id = player.current_room.id
+    rooms[id] = new_room(player.current_room)
 
-while len(rooms) < len(room_graph):
-    # do a dft from the current room
-    dft(player.current_room)
-    print(f'rooms visited {len(rooms)}')
-    print(f'traversals {len(traversal_path)}')
-    print(f'current room {player.current_room.id}')
-    if len(rooms) < len(room_graph):
-        # find the path to the nearest room with ?'s
-        path = bfs(player.current_room)[1]
-        print('BFS done')
-        # convert that path to a list of directions
-        directions = to_direction(path)
-        print('to_directions done')
-        # loop through the directions
-        for direction in directions:
-            # add the direction to the master traversal path
-            traversal_path.append(direction)
-            # move player
-            player.travel(direction)
-        print('loop done')
-        print('====================================================')
-        print('')
+    while len(rooms) < len(room_graph):
+        # do a dft from the current room
+        dft(player.current_room)
+        if len(rooms) < len(room_graph):
+            # find the path to the nearest room with ?'s
+            path = bfs(player.current_room)[1]
+            # convert that path to a list of directions
+            directions = to_direction(path)
+            # loop through the directions
+            for direction in directions:
+                # add the direction to the master traversal path
+                traversal_path.append(direction)
+                # move player
+                player.travel(direction)
 
+    if len(traversal_path) < best_path:
+        best_path = len(traversal_path)
+    
+    counter += 1
 
-# reset the player at the starting room
-player.current_room = world.starting_room
+print(best_path)
 
-for move in traversal_path:
-    player.travel(move)
-    visited_rooms.add(player.current_room.id)
-
-if len(visited_rooms) == len(room_graph):
-    print(f"TESTS PASSED: {len(traversal_path)} moves, {len(visited_rooms)} rooms visited")
-else:
-    print("TESTS FAILED: INCOMPLETE TRAVERSAL")
-    print(f"{len(room_graph) - len(visited_rooms)} unvisited rooms")
-
-
-
-#######
-# UNCOMMENT TO WALK AROUND
-#######
-'''player.current_room.print_room_description(player)
-exits = player.current_room.get_exits()
-for e in exits:
-    player.travel(e)
-    player.current_room.print_room_description(player)
-while True:
-    cmds = input("-> ").lower().split(" ")
-    if cmds[0] in ["n", "s", "e", "w"]:
-        player.travel(cmds[0], True)
-    elif cmds[0] == "q":
-        break
-    else:
-        print("I did not understand that command.")'''
+# best path after 1,000,000 iterations = 957
